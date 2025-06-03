@@ -276,7 +276,7 @@ public class RichiesteController : ControllerBase
 
     [HttpGet("da-approvare")]
     [Authorize(Roles = "Responsabile")]
-    public async Task<ActionResult<IEnumerable<RichiestaPermesso>>> GetRichiesteDaApprovare()
+    public async Task<ActionResult<IEnumerable<RichiestaPermessoDTO>>> GetRichiesteDaApprovare()
     {
         var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
         var utente = await _context.Utenti.FindAsync(userId);
@@ -288,11 +288,26 @@ public class RichiesteController : ControllerBase
         var richieste = await _context.RichiestePermessi
             .Include(r => r.Categoria)
             .Include(r => r.Utente)
+            .Include(r => r.UtenteValutazione)
             .Where(r => r.Stato == "In attesa")
             .OrderByDescending(r => r.DataRichiesta)
             .ToListAsync();
 
-        return Ok(richieste);
+        var richiesteDTO = richieste.Select(r => new RichiestaPermessoDTO
+        {
+            RichiestaID = r.RichiestaID,
+            DataRichiesta = r.DataRichiesta,
+            DataInizio = r.DataInizio,
+            DataFine = r.DataFine,
+            Motivazione = r.Motivazione,
+            Stato = r.Stato,
+            CategoriaDescrizione = r.Categoria != null ? r.Categoria.Descrizione : "",
+            UtenteNomeCompleto = r.Utente != null ? $"{r.Utente.Nome} {r.Utente.Cognome}" : "",
+            DataValutazione = r.DataValutazione,
+            UtenteValutazioneNomeCompleto = r.UtenteValutazione != null ? $"{r.UtenteValutazione.Nome} {r.UtenteValutazione.Cognome}" : null
+        }).ToList();
+
+        return Ok(richiesteDTO);
     }
 
     [HttpPut("{id}/valuta")]
