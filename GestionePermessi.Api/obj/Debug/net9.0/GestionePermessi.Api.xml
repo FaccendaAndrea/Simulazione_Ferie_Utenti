@@ -51,5 +51,17 @@
         <member name="M:GestionePermessi.Api.Migrations.UpdateUserPasswords.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
             <inheritdoc />
         </member>
+        <member name="T:GestionePermessi.Api.Migrations.UpdateSeedDates">
+            <inheritdoc />
+        </member>
+        <member name="M:GestionePermessi.Api.Migrations.UpdateSeedDates.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:GestionePermessi.Api.Migrations.UpdateSeedDates.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:GestionePermessi.Api.Migrations.UpdateSeedDates.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
     </members>
 </doc>

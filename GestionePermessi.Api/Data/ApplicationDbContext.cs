@@ -52,6 +52,24 @@ public class ApplicationDbContext : DbContext
             new Utente
             {
                 UtenteID = 1,
+                Nome = "Andrea",
+                Cognome = "Faccenda",
+                Email = "csgopro@azienda.com",
+                Password = hashedPassword,
+                Ruolo = "Responsabile"
+            },
+            new Utente
+            {
+                UtenteID = 2,
+                Nome = "Giorgio",
+                Cognome = "Gialli",
+                Email = "giorgiogialli@azienda.com",
+                Password = hashedPassword,
+                Ruolo = "Dipendente"
+            },
+            new Utente
+            {
+                UtenteID = 3,
                 Nome = "Mario",
                 Cognome = "Rossi",
                 Email = "mario.rossi@azienda.com",
@@ -60,12 +78,96 @@ public class ApplicationDbContext : DbContext
             },
             new Utente
             {
-                UtenteID = 2,
+                UtenteID = 4,
                 Nome = "Giuseppe",
                 Cognome = "Verdi",
                 Email = "giuseppe.verdi@azienda.com",
                 Password = hashedPassword,
                 Ruolo = "Dipendente"
+            }
+        );
+
+        // Seed richieste permesso (copertura casi: in attesa, approvata, rifiutata, varie categorie)
+        modelBuilder.Entity<RichiestaPermesso>().HasData(
+            // In attesa (Giorgio Gialli)
+            new RichiestaPermesso
+            {
+                RichiestaID = 1,
+                DataRichiesta = new DateTime(2025, 6, 1),
+                DataInizio = new DateTime(2025, 6, 10),
+                DataFine = new DateTime(2025, 6, 12),
+                Motivazione = "Ferie estive",
+                Stato = "In attesa",
+                CategoriaID = 1,
+                UtenteID = 2
+            },
+            // Approvata (Giorgio Gialli, valutata da Andrea Faccenda)
+            new RichiestaPermesso
+            {
+                RichiestaID = 2,
+                DataRichiesta = new DateTime(2025, 7, 1),
+                DataInizio = new DateTime(2025, 7, 10),
+                DataFine = new DateTime(2025, 7, 12),
+                Motivazione = "Visita medica",
+                Stato = "Approvata",
+                CategoriaID = 2,
+                UtenteID = 2,
+                DataValutazione = new DateTime(2025, 7, 5),
+                UtenteValutazioneID = 1
+            },
+            // Rifiutata (Giorgio Gialli, valutata da Andrea Faccenda)
+            new RichiestaPermesso
+            {
+                RichiestaID = 3,
+                DataRichiesta = new DateTime(2025, 8, 1),
+                DataInizio = new DateTime(2025, 8, 10),
+                DataFine = new DateTime(2025, 8, 11),
+                Motivazione = "Permesso personale non urgente",
+                Stato = "Rifiutata",
+                CategoriaID = 3,
+                UtenteID = 2,
+                DataValutazione = new DateTime(2025, 8, 12),
+                UtenteValutazioneID = 1
+            },
+            // In attesa (Giuseppe Verdi)
+            new RichiestaPermesso
+            {
+                RichiestaID = 4,
+                DataRichiesta = new DateTime(2025, 9, 2),
+                DataInizio = new DateTime(2025, 9, 15),
+                DataFine = new DateTime(2025, 9, 16),
+                Motivazione = "Ferie brevi",
+                Stato = "In attesa",
+                CategoriaID = 1,
+                UtenteID = 4
+            },
+            // Approvata (Giuseppe Verdi, valutata da Mario Rossi)
+            new RichiestaPermesso
+            {
+                RichiestaID = 5,
+                DataRichiesta = new DateTime(2025, 10, 1),
+                DataInizio = new DateTime(2025, 10, 10),
+                DataFine = new DateTime(2025, 10, 12),
+                Motivazione = "Permesso personale urgente",
+                Stato = "Approvata",
+                CategoriaID = 3,
+                UtenteID = 4,
+                DataValutazione = new DateTime(2025, 10, 13),
+                UtenteValutazioneID = 3
+            },
+            // Rifiutata (Giuseppe Verdi, valutata da Mario Rossi)
+            new RichiestaPermesso
+            {
+                RichiestaID = 6,
+                DataRichiesta = new DateTime(2025, 11, 1),
+                DataInizio = new DateTime(2025, 11, 10),
+                DataFine = new DateTime(2025, 11, 11),
+                Motivazione = "Permesso medico non documentato",
+                Stato = "Rifiutata",
+                CategoriaID = 2,
+                UtenteID = 4,
+                DataValutazione = new DateTime(2025, 11, 12),
+                UtenteValutazioneID = 3
             }
         );
     }
