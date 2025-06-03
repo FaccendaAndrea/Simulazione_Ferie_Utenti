@@ -25,6 +25,14 @@ interface NuovaRichiestaDialogProps {
     open: boolean;
     onClose: () => void;
     onRichiestaCreata: () => void;
+    richiestaDaModificare?: {
+        richiestaID: number;
+        dataInizio: string;
+        dataFine: string;
+        motivazione: string;
+        categoriaID: number;
+    };
+    onRichiestaAggiornata?: () => void;
 }
 
 const validationSchema = yup.object({
@@ -48,7 +56,9 @@ const validationSchema = yup.object({
 const NuovaRichiestaDialog: React.FC<NuovaRichiestaDialogProps> = ({
     open,
     onClose,
-    onRichiestaCreata
+    onRichiestaCreata,
+    richiestaDaModificare,
+    onRichiestaAggiornata
 }) => {
     const [categorie, setCategorie] = useState<CategoriaPermesso[]>([]);
 
@@ -61,11 +71,25 @@ const NuovaRichiestaDialog: React.FC<NuovaRichiestaDialogProps> = ({
                 console.error('Error loading categories:', error);
             }
         };
-
         if (open) {
             loadCategorie();
         }
     }, [open]);
+
+    // Precompila i valori se in modifica
+    useEffect(() => {
+        if (open && richiestaDaModificare) {
+            formik.setValues({
+                dataInizio: richiestaDaModificare.dataInizio,
+                dataFine: richiestaDaModificare.dataFine,
+                motivazione: richiestaDaModificare.motivazione,
+                categoriaID: richiestaDaModificare.categoriaID
+            });
+        } else if (open && !richiestaDaModificare) {
+            formik.resetForm();
+        }
+        // eslint-disable-next-line
+    }, [open, richiestaDaModificare]);
 
     const formik = useFormik<NuovaRichiestaPermesso>({
         initialValues: {
@@ -77,11 +101,16 @@ const NuovaRichiestaDialog: React.FC<NuovaRichiestaDialogProps> = ({
         validationSchema: validationSchema,
         onSubmit: async (values) => {
             try {
-                await api.createRichiesta(values);
-                onRichiestaCreata();
+                if (richiestaDaModificare) {
+                    await api.updateRichiesta(richiestaDaModificare.richiestaID, values);
+                    onRichiestaAggiornata && onRichiestaAggiornata();
+                } else {
+                    await api.createRichiesta(values);
+                    onRichiestaCreata();
+                }
                 formik.resetForm();
             } catch (error) {
-                console.error('Error creating request:', error);
+                console.error('Error saving request:', error);
             }
         },
     });
@@ -93,7 +122,7 @@ const NuovaRichiestaDialog: React.FC<NuovaRichiestaDialogProps> = ({
 
     return (
         <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
-            <DialogTitle>Nuova richiesta di permesso</DialogTitle>
+            <DialogTitle>{richiestaDaModificare ? 'Modifica richiesta di permesso' : 'Nuova richiesta di permesso'}</DialogTitle>
             <form onSubmit={formik.handleSubmit}>
                 <DialogContent>
                     <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={it}>

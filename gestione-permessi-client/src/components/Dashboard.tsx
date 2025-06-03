@@ -35,6 +35,8 @@ const Dashboard: React.FC = () => {
     const [richieste, setRichieste] = useState<RichiestaPermesso[]>([]);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
+    const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+    const [richiestaDaModificare, setRichiestaDaModificare] = useState<RichiestaPermesso | null>(null);
 
     const loadRichieste = async () => {
         try {
@@ -73,6 +75,22 @@ const Dashboard: React.FC = () => {
                 console.error('Error deleting request:', error);
             }
         }
+    };
+
+    const handleOpenEditDialog = (richiesta: RichiestaPermesso) => {
+        setRichiestaDaModificare(richiesta);
+        setIsEditDialogOpen(true);
+    };
+
+    const handleCloseEditDialog = () => {
+        setIsEditDialogOpen(false);
+        setRichiestaDaModificare(null);
+    };
+
+    const handleRichiestaAggiornata = async () => {
+        await loadRichieste();
+        setIsEditDialogOpen(false);
+        setRichiestaDaModificare(null);
     };
 
     if (isLoading) {
@@ -141,14 +159,25 @@ const Dashboard: React.FC = () => {
                                     </TableCell>
                                     <TableCell>
                                         {richiesta.stato === 'In attesa' && (
-                                            <Button
-                                                variant="outlined"
-                                                color="error"
-                                                size="small"
-                                                onClick={() => handleDeleteRichiesta(richiesta.richiestaID)}
-                                            >
-                                                Elimina
-                                            </Button>
+                                            <>
+                                                <Button
+                                                    variant="outlined"
+                                                    color="primary"
+                                                    size="small"
+                                                    onClick={() => handleOpenEditDialog(richiesta)}
+                                                    sx={{ mr: 1 }}
+                                                >
+                                                    Modifica
+                                                </Button>
+                                                <Button
+                                                    variant="outlined"
+                                                    color="error"
+                                                    size="small"
+                                                    onClick={() => handleDeleteRichiesta(richiesta.richiestaID)}
+                                                >
+                                                    Elimina
+                                                </Button>
+                                            </>
                                         )}
                                     </TableCell>
                                 </TableRow>
@@ -161,6 +190,19 @@ const Dashboard: React.FC = () => {
                 open={isDialogOpen}
                 onClose={handleCloseDialog}
                 onRichiestaCreata={handleRichiestaCreata}
+            />
+            <NuovaRichiestaDialog
+                open={isEditDialogOpen}
+                onClose={handleCloseEditDialog}
+                onRichiestaCreata={() => {}}
+                richiestaDaModificare={richiestaDaModificare ? {
+                    richiestaID: richiestaDaModificare.richiestaID,
+                    dataInizio: richiestaDaModificare.dataInizio,
+                    dataFine: richiestaDaModificare.dataFine,
+                    motivazione: richiestaDaModificare.motivazione,
+                    categoriaID: 0 // Da mappare se necessario
+                } : undefined}
+                onRichiestaAggiornata={handleRichiestaAggiornata}
             />
         </Container>
     );

@@ -15,17 +15,34 @@ import {
 } from '@mui/material';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
-import { RichiestaPermesso } from '../types/permessi';
+import { RichiestaPermesso, CategoriaPermesso } from '../types/permessi';
 import * as api from '../services/api';
+import NuovaRichiestaDialog from './NuovaRichiestaDialog';
 
 const RichiesteDaApprovare: React.FC = () => {
     const [richieste, setRichieste] = useState<RichiestaPermesso[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+    const [richiestaDaModificare, setRichiestaDaModificare] = useState<RichiestaPermesso | null>(null);
+    const [categorie, setCategorie] = useState<CategoriaPermesso[]>([]);
+
+    const mapRichiesta = (r: any): RichiestaPermesso => ({
+        richiestaID: r.richiestaID ?? r.richiestaID ?? r.id,
+        dataRichiesta: r.dataRichiesta ?? r.dataRichiesta,
+        dataInizio: r.dataInizio ?? r.dataInizio,
+        dataFine: r.dataFine ?? r.dataFine,
+        motivazione: r.motivazione ?? r.motivazione,
+        stato: r.stato ?? r.stato,
+        categoriaDescrizione: r.categoriaDescrizione || (categorie.find(c => c.categoriaID === (r.categoriaID ?? r.categoriaId))?.descrizione ?? ''),
+        utenteNomeCompleto: r.utenteNomeCompleto || (r.utente ? `${r.utente.nome} ${r.utente.cognome}` : ''),
+        dataValutazione: r.dataValutazione,
+        utenteValutazioneNomeCompleto: r.utenteValutazioneNomeCompleto || (r.utenteValutazione ? `${r.utenteValutazione.nome} ${r.utenteValutazione.cognome}` : undefined)
+    });
 
     const loadRichieste = async () => {
         try {
             const data = await api.getRichiesteDaApprovare();
-            setRichieste(data);
+            setRichieste(Array.isArray(data) ? data.map(mapRichiesta) : []);
         } catch (error) {
             console.error('Error loading requests:', error);
         } finally {
@@ -35,6 +52,16 @@ const RichiesteDaApprovare: React.FC = () => {
 
     useEffect(() => {
         loadRichieste();
+        // Carica le categorie per il mapping
+        const loadCategorie = async () => {
+            try {
+                const data = await api.getCategorie();
+                setCategorie(data);
+            } catch (error) {
+                console.error('Error loading categories:', error);
+            }
+        };
+        loadCategorie();
     }, []);
 
     const handleValutazione = async (id: number, stato: 'Approvata' | 'Rifiutata') => {
@@ -44,6 +71,27 @@ const RichiesteDaApprovare: React.FC = () => {
         } catch (error) {
             console.error('Error evaluating request:', error);
         }
+    };
+
+    const handleOpenEditDialog = (richiesta: RichiestaPermesso) => {
+        setRichiestaDaModificare(richiesta);
+        setIsEditDialogOpen(true);
+    };
+
+    const handleCloseEditDialog = () => {
+        setIsEditDialogOpen(false);
+        setRichiestaDaModificare(null);
+    };
+
+    const handleRichiestaAggiornata = async () => {
+        await loadRichieste();
+        setIsEditDialogOpen(false);
+        setRichiestaDaModificare(null);
+    };
+
+    const categorieToId = (descrizione: string): number => {
+        const cat = categorie.find(c => c.descrizione === descrizione);
+        return cat ? cat.categoriaID : 0;
     };
 
     if (isLoading) {
@@ -102,6 +150,14 @@ const RichiesteDaApprovare: React.FC = () => {
                                             >
                                                 Rifiuta
                                             </Button>
+                                            <Button
+                                                variant="outlined"
+                                                color="primary"
+                                                onClick={() => handleOpenEditDialog(richiesta)}
+                                                disabled={richiesta.stato !== 'In attesa'}
+                                            >
+                                                Modifica
+                                            </Button>
                                         </ButtonGroup>
                                     </TableCell>
                                 </TableRow>
@@ -117,6 +173,19 @@ const RichiesteDaApprovare: React.FC = () => {
                     </Table>
                 </TableContainer>
             </Box>
+            <NuovaRichiestaDialog
+                open={isEditDialogOpen}
+                onClose={handleCloseEditDialog}
+                onRichiestaCreata={() => {}}
+                richiestaDaModificare={richiestaDaModificare ? {
+                    richiestaID: richiestaDaModificare.richiestaID,
+                    dataInizio: richiestaDaModificare.dataInizio,
+                    dataFine: richiestaDaModificare.dataFine,
+                    motivazione: richiestaDaModificare.motivazione,
+                    categoriaID: richiestaDaModificare.categoriaDescrizione ? categorieToId(richiestaDaModificare.categoriaDescrizione) : 0
+                } : undefined}
+                onRichiestaAggiornata={handleRichiestaAggiornata}
+            />
         </Container>
     );
 };
