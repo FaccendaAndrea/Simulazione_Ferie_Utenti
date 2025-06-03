@@ -166,3 +166,4 @@ C:\Users\faccenda_a\Desktop\RepoGit\Simulazione_Ferie_Utenti\GestionePermessi.Ap
 C:\Users\faccenda_a\Desktop\RepoGit\Simulazione_Ferie_Utenti\GestionePermessi.Api\obj\Debug\net9.0\GestionePermessi.Api.pdb
 C:\Users\faccenda_a\Desktop\RepoGit\Simulazione_Ferie_Utenti\GestionePermessi.Api\obj\Debug\net9.0\GestionePermessi.Api.genruntimeconfig.cache
 C:\Users\faccenda_a\Desktop\RepoGit\Simulazione_Ferie_Utenti\GestionePermessi.Api\obj\Debug\net9.0\ref\GestionePermessi.Api.dll
+C:\Users\faccenda_a\Desktop\RepoGit\Simulazione_Ferie_Utenti\GestionePermessi.Api\obj\Debug\net9.0\GestionePermessi.Api.sourcelink.json

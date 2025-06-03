@@ -21,7 +21,7 @@ public class RichiesteController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<RichiestaPermesso>>> GetRichieste()
+    public async Task<ActionResult<IEnumerable<RichiestaPermessoDTO>>> GetRichieste()
     {
         var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
         var utente = await _context.Utenti.FindAsync(userId);
@@ -36,13 +36,26 @@ public class RichiesteController : ControllerBase
             .Include(r => r.UtenteValutazione)
             .Where(r => r.UtenteID == userId)
             .OrderByDescending(r => r.DataRichiesta)
+            .Select(r => new RichiestaPermessoDTO
+            {
+                RichiestaID = r.RichiestaID,
+                DataRichiesta = r.DataRichiesta,
+                DataInizio = r.DataInizio,
+                DataFine = r.DataFine,
+                Motivazione = r.Motivazione,
+                Stato = r.Stato,
+                CategoriaDescrizione = r.Categoria.Descrizione,
+                UtenteNomeCompleto = $"{r.Utente.Nome} {r.Utente.Cognome}",
+                DataValutazione = r.DataValutazione,
+                UtenteValutazioneNomeCompleto = r.UtenteValutazione != null ? $"{r.UtenteValutazione.Nome} {r.UtenteValutazione.Cognome}" : null
+            })
             .ToListAsync();
 
         return Ok(richieste);
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<RichiestaPermesso>> GetRichiesta(int id)
+    public async Task<ActionResult<RichiestaPermessoDTO>> GetRichiesta(int id)
     {
         var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
         var utente = await _context.Utenti.FindAsync(userId);
@@ -55,7 +68,21 @@ public class RichiesteController : ControllerBase
             .Include(r => r.Categoria)
             .Include(r => r.Utente)
             .Include(r => r.UtenteValutazione)
-            .FirstOrDefaultAsync(r => r.RichiestaID == id && r.UtenteID == userId);
+            .Where(r => r.RichiestaID == id && r.UtenteID == userId)
+            .Select(r => new RichiestaPermessoDTO
+            {
+                RichiestaID = r.RichiestaID,
+                DataRichiesta = r.DataRichiesta,
+                DataInizio = r.DataInizio,
+                DataFine = r.DataFine,
+                Motivazione = r.Motivazione,
+                Stato = r.Stato,
+                CategoriaDescrizione = r.Categoria.Descrizione,
+                UtenteNomeCompleto = $"{r.Utente.Nome} {r.Utente.Cognome}",
+                DataValutazione = r.DataValutazione,
+                UtenteValutazioneNomeCompleto = r.UtenteValutazione != null ? $"{r.UtenteValutazione.Nome} {r.UtenteValutazione.Cognome}" : null
+            })
+            .FirstOrDefaultAsync();
 
         if (richiesta == null)
         {
@@ -66,7 +93,7 @@ public class RichiesteController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<RichiestaPermesso>> CreateRichiesta(RichiestaPermesso richiesta)
+    public async Task<ActionResult<RichiestaPermessoDTO>> CreateRichiesta(RichiestaPermessoCreateDTO createDto)
     {
         var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
         var utente = await _context.Utenti.FindAsync(userId);
@@ -75,22 +102,58 @@ public class RichiesteController : ControllerBase
             return NotFound("Utente non trovato");
         }
 
-        var categoria = await _context.CategoriePermessi.FindAsync(richiesta.CategoriaID);
+        var categoria = await _context.CategoriePermessi.FindAsync(createDto.CategoriaID);
         if (categoria == null)
         {
             return NotFound("Categoria non trovata");
         }
 
-        richiesta.UtenteID = userId;
-        richiesta.DataRichiesta = DateTime.Now;
-        richiesta.Stato = "In attesa";
-        richiesta.Utente = utente;
-        richiesta.Categoria = categoria;
+        // Validazione date
+        if (createDto.DataInizio > createDto.DataFine)
+        {
+            return BadRequest("La data di inizio deve essere precedente alla data di fine");
+        }
+
+        if (createDto.DataInizio.Date < DateTime.Now.Date)
+        {
+            return BadRequest("La data di inizio non può essere nel passato");
+        }
+
+        var richiesta = new RichiestaPermesso
+        {
+            UtenteID = userId,
+            DataRichiesta = DateTime.Now,
+            DataInizio = createDto.DataInizio,
+            DataFine = createDto.DataFine,
+            Motivazione = createDto.Motivazione,
+            CategoriaID = createDto.CategoriaID,
+            Stato = "In attesa"
+        };
 
         _context.RichiestePermessi.Add(richiesta);
         await _context.SaveChangesAsync();
 
-        return CreatedAtAction(nameof(GetRichiesta), new { id = richiesta.RichiestaID }, richiesta);
+        // Carica la richiesta appena creata con tutte le relazioni
+        var richiestaCreata = await _context.RichiestePermessi
+            .Include(r => r.Categoria)
+            .Include(r => r.Utente)
+            .Where(r => r.RichiestaID == richiesta.RichiestaID)
+            .Select(r => new RichiestaPermessoDTO
+            {
+                RichiestaID = r.RichiestaID,
+                DataRichiesta = r.DataRichiesta,
+                DataInizio = r.DataInizio,
+                DataFine = r.DataFine,
+                Motivazione = r.Motivazione,
+                Stato = r.Stato,
+                CategoriaDescrizione = r.Categoria.Descrizione,
+                UtenteNomeCompleto = $"{r.Utente.Nome} {r.Utente.Cognome}",
+                DataValutazione = r.DataValutazione,
+                UtenteValutazioneNomeCompleto = null
+            })
+            .FirstAsync();
+
+        return CreatedAtAction(nameof(GetRichiesta), new { id = richiesta.RichiestaID }, richiestaCreata);
     }
 
     [HttpPut("{id}")]

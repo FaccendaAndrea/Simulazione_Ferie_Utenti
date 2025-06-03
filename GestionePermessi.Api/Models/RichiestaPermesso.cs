@@ -19,20 +19,20 @@ public class RichiestaPermesso
     
     [Required]
     [MaxLength(500)]
-    public required string Motivazione { get; set; }
+    public string Motivazione { get; set; } = null!;
     
     [Required]
-    public required string Stato { get; set; } // "In attesa", "Approvata", "Rifiutata"
+    public string Stato { get; set; } = null!; // "In attesa", "Approvata", "Rifiutata"
     
     [Required]
     public int CategoriaID { get; set; }
     [ForeignKey("CategoriaID")]
-    public required CategoriaPermesso Categoria { get; set; }
+    public CategoriaPermesso? Categoria { get; set; }
     
     [Required]
     public int UtenteID { get; set; }
     [ForeignKey("UtenteID")]
-    public required Utente Utente { get; set; }
+    public Utente? Utente { get; set; }
     
     public DateTime? DataValutazione { get; set; }
     
