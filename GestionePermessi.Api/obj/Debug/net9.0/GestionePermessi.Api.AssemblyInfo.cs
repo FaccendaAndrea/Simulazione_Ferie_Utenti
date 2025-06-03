@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("GestionePermessi.Api")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+a9af579a73abea248e2e2d71ce6b211a0d704dda")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+82cd72e30b6c40d305b712d0c308db63d023189b")]
 [assembly: System.Reflection.AssemblyProductAttribute("GestionePermessi.Api")]
 [assembly: System.Reflection.AssemblyTitleAttribute("GestionePermessi.Api")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

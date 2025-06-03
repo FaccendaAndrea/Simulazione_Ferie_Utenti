@@ -32,7 +32,6 @@ const getStatoColor = (stato: string) => {
 };
 
 const Dashboard: React.FC = () => {
-    const { user } = useAuth();
     const [richieste, setRichieste] = useState<RichiestaPermesso[]>([]);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
