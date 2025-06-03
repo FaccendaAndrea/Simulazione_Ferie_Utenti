@@ -157,18 +157,13 @@ public class RichiesteController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateRichiesta(int id, RichiestaPermesso richiesta)
+    public async Task<ActionResult<RichiestaPermessoDTO>> UpdateRichiesta(int id, RichiestaPermessoUpdateDTO updateDto)
     {
         var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
         var utente = await _context.Utenti.FindAsync(userId);
         if (utente == null)
         {
             return NotFound("Utente non trovato");
-        }
-
-        if (id != richiesta.RichiestaID)
-        {
-            return BadRequest();
         }
 
         var existingRichiesta = await _context.RichiestePermessi
@@ -178,7 +173,7 @@ public class RichiesteController : ControllerBase
 
         if (existingRichiesta == null)
         {
-            return NotFound();
+            return NotFound("Richiesta non trovata");
         }
 
         if (existingRichiesta.Stato != "In attesa")
@@ -186,14 +181,56 @@ public class RichiesteController : ControllerBase
             return BadRequest("Non è possibile modificare una richiesta già valutata");
         }
 
-        existingRichiesta.DataInizio = richiesta.DataInizio;
-        existingRichiesta.DataFine = richiesta.DataFine;
-        existingRichiesta.Motivazione = richiesta.Motivazione;
-        existingRichiesta.CategoriaID = richiesta.CategoriaID;
+        // Validazione date
+        if (updateDto.DataInizio > updateDto.DataFine)
+        {
+            return BadRequest("La data di inizio deve essere precedente alla data di fine");
+        }
+
+        if (updateDto.DataInizio.Date < DateTime.Now.Date)
+        {
+            return BadRequest("La data di inizio non può essere nel passato");
+        }
+
+        // Verifica che la categoria esista
+        var categoria = await _context.CategoriePermessi.FindAsync(updateDto.CategoriaID);
+        if (categoria == null)
+        {
+            return NotFound("Categoria non trovata");
+        }
+
+        // Aggiorna solo i campi modificabili
+        existingRichiesta.DataInizio = updateDto.DataInizio;
+        existingRichiesta.DataFine = updateDto.DataFine;
+        existingRichiesta.Motivazione = updateDto.Motivazione;
+        existingRichiesta.CategoriaID = updateDto.CategoriaID;
 
         try
         {
             await _context.SaveChangesAsync();
+
+            // Carica la richiesta aggiornata con tutte le relazioni
+            var richiestaAggiornata = await _context.RichiestePermessi
+                .Include(r => r.Categoria)
+                .Include(r => r.Utente)
+                .Include(r => r.UtenteValutazione)
+                .Where(r => r.RichiestaID == id)
+                .Select(r => new RichiestaPermessoDTO
+                {
+                    RichiestaID = r.RichiestaID,
+                    DataRichiesta = r.DataRichiesta,
+                    DataInizio = r.DataInizio,
+                    DataFine = r.DataFine,
+                    Motivazione = r.Motivazione,
+                    Stato = r.Stato,
+                    CategoriaDescrizione = r.Categoria!.Descrizione,
+                    UtenteNomeCompleto = $"{r.Utente!.Nome} {r.Utente.Cognome}",
+                    DataValutazione = r.DataValutazione,
+                    UtenteValutazioneNomeCompleto = r.UtenteValutazione != null ? $"{r.UtenteValutazione.Nome} {r.UtenteValutazione.Cognome}" : null
+                })
+                .FirstAsync();
+
+            return Ok(richiestaAggiornata);
         }
         catch (DbUpdateConcurrencyException)
         {
@@ -206,8 +243,6 @@ public class RichiesteController : ControllerBase
                 throw;
             }
         }
-
-        return NoContent();
     }
 
     [HttpDelete("{id}")]

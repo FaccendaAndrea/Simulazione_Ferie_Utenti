@@ -18,6 +18,22 @@ public class RichiestaPermessoCreateDTO
     public int CategoriaID { get; set; }
 }
 
+public class RichiestaPermessoUpdateDTO
+{
+    [Required(ErrorMessage = "La data di inizio è obbligatoria")]
+    public DateTime DataInizio { get; set; }
+
+    [Required(ErrorMessage = "La data di fine è obbligatoria")]
+    public DateTime DataFine { get; set; }
+
+    [Required(ErrorMessage = "La motivazione è obbligatoria")]
+    [MinLength(5, ErrorMessage = "La motivazione deve essere di almeno 5 caratteri")]
+    public string Motivazione { get; set; } = null!;
+
+    [Required(ErrorMessage = "La categoria è obbligatoria")]
+    public int CategoriaID { get; set; }
+}
+
 public class RichiestaPermessoDTO
 {
     public int RichiestaID { get; set; }
