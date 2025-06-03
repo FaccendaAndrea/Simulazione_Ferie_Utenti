@@ -23,25 +23,31 @@ import { it } from 'date-fns/locale';
 import { CategoriaPermesso, Statistiche as StatisticheTipo } from '../types/permessi';
 import * as api from '../services/api';
 
+interface Utente {
+    utenteID: number;
+    nome: string;
+    cognome: string;
+    ruolo: string;
+}
+
 const Statistiche: React.FC = () => {
     const [statistiche, setStatistiche] = useState<StatisticheTipo[]>([]);
-    const [categorie, setCategorie] = useState<CategoriaPermesso[]>([]);
+    const [utenti, setUtenti] = useState<Utente[]>([]);
     const [filtroAnno, setFiltroAnno] = useState<number>(new Date().getFullYear());
     const [filtroMese, setFiltroMese] = useState<number | null>(null);
-    const [filtroCategoriaID, setFiltroCategoriaID] = useState<number | null>(null);
+    const [filtroUtenteID, setFiltroUtenteID] = useState<number | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        const loadCategorie = async () => {
+        const loadUtenti = async () => {
             try {
-                const data = await api.getCategorie();
-                setCategorie(data);
+                const response = await api.getUtenti();
+                setUtenti(response);
             } catch (error) {
-                console.error('Error loading categories:', error);
+                console.error('Error loading users:', error);
             }
         };
-
-        loadCategorie();
+        loadUtenti();
     }, []);
 
     useEffect(() => {
@@ -51,7 +57,7 @@ const Statistiche: React.FC = () => {
                 const data = await api.getStatistiche({
                     anno: filtroAnno,
                     mese: filtroMese || undefined,
-                    categoriaID: filtroCategoriaID || undefined
+                    utenteID: filtroUtenteID || undefined
                 });
                 setStatistiche(data);
             } catch (error) {
@@ -62,7 +68,7 @@ const Statistiche: React.FC = () => {
         };
 
         loadStatistiche();
-    }, [filtroAnno, filtroMese, filtroCategoriaID]);
+    }, [filtroAnno, filtroMese, filtroUtenteID]);
 
     const mesi = [
         { value: 1, label: 'Gennaio' },
@@ -127,17 +133,17 @@ const Statistiche: React.FC = () => {
                     </Box>
                     <Box sx={{ flex: 1 }}>
                         <FormControl fullWidth>
-                            <InputLabel id="categoria-label">Categoria</InputLabel>
+                            <InputLabel id="utente-label">Utente</InputLabel>
                             <Select
-                                labelId="categoria-label"
-                                value={filtroCategoriaID || ''}
-                                onChange={(e) => setFiltroCategoriaID(e.target.value ? Number(e.target.value) : null)}
-                                label="Categoria"
+                                labelId="utente-label"
+                                value={filtroUtenteID || ''}
+                                onChange={(e) => setFiltroUtenteID(e.target.value ? Number(e.target.value) : null)}
+                                label="Utente"
                             >
-                                <MenuItem value="">Tutte</MenuItem>
-                                {categorie.map((categoria) => (
-                                    <MenuItem key={categoria.categoriaID} value={categoria.categoriaID}>
-                                        {categoria.descrizione}
+                                <MenuItem value="">Tutti</MenuItem>
+                                {utenti.map((utente) => (
+                                    <MenuItem key={utente.utenteID} value={utente.utenteID}>
+                                        {utente.nome} {utente.cognome} ({utente.ruolo})
                                     </MenuItem>
                                 ))}
                             </Select>
@@ -151,7 +157,6 @@ const Statistiche: React.FC = () => {
                                 <TableCell>Dipendente</TableCell>
                                 <TableCell>Anno</TableCell>
                                 <TableCell>Mese</TableCell>
-                                <TableCell>Categoria</TableCell>
                                 <TableCell align="right">Giorni totali</TableCell>
                             </TableRow>
                         </TableHead>
@@ -161,13 +166,12 @@ const Statistiche: React.FC = () => {
                                     <TableCell>{stat.utenteNomeCompleto}</TableCell>
                                     <TableCell>{stat.anno}</TableCell>
                                     <TableCell>{mesi[stat.mese - 1].label}</TableCell>
-                                    <TableCell>{stat.categoriaDescrizione}</TableCell>
                                     <TableCell align="right">{stat.giorniTotali}</TableCell>
                                 </TableRow>
                             ))}
                             {statistiche.length === 0 && (
                                 <TableRow>
-                                    <TableCell colSpan={5} align="center">
+                                    <TableCell colSpan={4} align="center">
                                         <Typography>Nessun dato disponibile per i filtri selezionati</Typography>
                                     </TableCell>
                                 </TableRow>

@@ -87,4 +87,9 @@ export const getStatistiche = async (filter: StatisticheFilter): Promise<Statist
 
     const response = await api.get('/statistiche', { params });
     return response.data;
+};
+
+export const getUtenti = async (): Promise<{ utenteID: number; nome: string; cognome: string; ruolo: string }[]> => {
+    const response = await api.get('/utenti');
+    return response.data;
 }; 

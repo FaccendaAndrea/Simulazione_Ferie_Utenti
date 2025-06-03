@@ -39,5 +39,4 @@ export interface Statistiche {
     anno: number;
     mese: number;
     giorniTotali: number;
-    categoriaDescrizione: string;
 } 

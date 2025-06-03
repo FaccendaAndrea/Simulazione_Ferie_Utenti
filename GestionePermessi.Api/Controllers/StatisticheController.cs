@@ -56,17 +56,14 @@ public class StatisticheController : ControllerBase
                     r.Utente.Nome, 
                     r.Utente.Cognome,
                     Anno = r.DataInizio.Year,
-                    Mese = r.DataInizio.Month,
-                    r.CategoriaID,
-                    CategoriaDescrizione = r.Categoria.Descrizione
+                    Mese = r.DataInizio.Month
                 })
                 .Select(g => new StatisticheDTO
                 {
                     UtenteNomeCompleto = $"{g.Key.Nome} {g.Key.Cognome}",
                     Anno = g.Key.Anno,
                     Mese = g.Key.Mese,
-                    GiorniTotali = g.Sum(r => (r.DataFine - r.DataInizio).Days + 1),
-                    CategoriaDescrizione = g.Key.CategoriaDescrizione
+                    GiorniTotali = g.Sum(r => (r.DataFine - r.DataInizio).Days + 1)
                 })
                 .OrderBy(s => s.UtenteNomeCompleto)
                 .ThenBy(s => s.Anno)

@@ -6,7 +6,6 @@ public class StatisticheDTO
     public int Anno { get; set; }
     public int Mese { get; set; }
     public int GiorniTotali { get; set; }
-    public required string CategoriaDescrizione { get; set; }
 }
 
 public class StatisticheFilterDTO
