@@ -1,0 +1,55 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>GestionePermessi.Api</name>
+    </assembly>
+    <members>
+        <member name="T:GestionePermessi.Api.Controllers.AuthController">
+            <summary>
+            Controller per la gestione dell'autenticazione degli utenti
+            </summary>
+        </member>
+        <member name="M:GestionePermessi.Api.Controllers.AuthController.Register(GestionePermessi.Api.DTOs.RegisterDTO)">
+            <summary>
+            Registra un nuovo utente nel sistema
+            </summary>
+            <param name="registerDto">Dati di registrazione dell'utente</param>
+            <returns>Token JWT e informazioni dell'utente registrato</returns>
+            <response code="200">Registrazione completata con successo</response>
+            <response code="400">Email già registrata nel sistema</response>
+        </member>
+        <member name="M:GestionePermessi.Api.Controllers.AuthController.Login(GestionePermessi.Api.DTOs.LoginDTO)">
+            <summary>
+            Effettua il login di un utente esistente
+            </summary>
+            <param name="loginDto">Credenziali di accesso</param>
+            <returns>Token JWT e informazioni dell'utente</returns>
+            <response code="200">Login effettuato con successo</response>
+            <response code="401">Credenziali non valide</response>
+        </member>
+        <member name="T:GestionePermessi.Api.Migrations.InitialCreate">
+            <inheritdoc />
+        </member>
+        <member name="M:GestionePermessi.Api.Migrations.InitialCreate.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:GestionePermessi.Api.Migrations.InitialCreate.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:GestionePermessi.Api.Migrations.InitialCreate.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:GestionePermessi.Api.Migrations.UpdateUserPasswords">
+            <inheritdoc />
+        </member>
+        <member name="M:GestionePermessi.Api.Migrations.UpdateUserPasswords.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:GestionePermessi.Api.Migrations.UpdateUserPasswords.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:GestionePermessi.Api.Migrations.UpdateUserPasswords.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+    </members>
+</doc>
